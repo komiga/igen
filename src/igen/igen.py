@@ -52,17 +52,57 @@ class Function:
 			named_args = named_args,
 		)
 
-def collect_functions(cursor, path, funcs = None):
+def collect_functions(cursor, pre_filter = None, post_filter = None, funcs = None):
 	funcs = funcs or []
 	for c in get_children(cursor):
 		if c.kind == CursorKind.NAMESPACE:
-			collect_functions(c, path, funcs)
-		elif c.kind == CursorKind.FUNCTION_DECL:
-			if path == c.location.file.name:
-				funcs.append(Function(c))
+			# FIXME: Why does funcs have to be reassigned?
+			# It should be the same object.
+			funcs = collect_functions(c, pre_filter, post_filter, funcs)
+		elif c.kind != CursorKind.FUNCTION_DECL:
+			continue
+		elif not pre_filter or pre_filter(c):
+			f = Function(c)
+			if not post_filter or post_filter(f):
+				funcs.append(f)
 	return funcs
 
 class Group:
-	def __init__(self, cursor, path):
+	def __init__(self, cursor, path, funcs):
 		self.path = path
-		self.funcs = collect_functions(cursor, path)
+		self.funcs = funcs
+
+	def write(self, path):
+		pass
+
+def make_pre_filter_path(path):
+	def f(cursor):
+		return cursor.location.file.name == path
+	return f
+
+def make_pre_filter_annotation(match = "igen"):
+	def f(cursor):
+		for a in get_annotations(cursor):
+			if a == match:
+				return True
+		return False
+	return f
+
+def collect(path, clang_args, pre_filter = None, post_filter = None):
+	index = cindex.Index.create()
+	tu = index.parse(path, clang_args)
+	if not tu:
+		raise RuntimeError("failed to parse %s" % (path))
+	funcs = collect_functions(tu.cursor, pre_filter, post_filter)
+	g = Group(tu.cursor, path, funcs)
+	return g
+
+def generate(path, gen_path, clang_args, pre_filter = None, post_filter = None):
+	g = collect(path, clang_args, pre_filter, post_filter)
+	print("generate: %s -> %s" % (path, gen_path))
+	for f in g.funcs:
+		print("  %s in %s" % (f.signature_fqn(), f.contextual_parent or "<root>"))
+		print("    explicit in %s" % (f.explicitly_qualified_name))
+		# print("    in %s" % (f.cursor.location.file.name))
+		# print("    annotations = %r" % (get_annotations(f.cursor)))
+	return g
