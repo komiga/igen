@@ -1,0 +1,8 @@
+
+% for ns in group.funcs_by_namespace.values():
+${ns.open_string()}
+% for f in ns.funcs:
+${ns.level > 0 and "\t" or ""}${f.signature(named_args = False)};
+% endfor
+${ns.close_string()}
+% endfor
