@@ -58,4 +58,6 @@ def fully_qualified_name_parts(cursor, until = None):
 	return parts[::-1]
 
 def fully_qualified_name(cursor, until = None, parts = None):
-	return "::".join(parts or fully_qualified_name_parts(cursor, until))
+	if parts == None:
+		parts = fully_qualified_name_parts(cursor, until)
+	return "::".join(parts) #or None
