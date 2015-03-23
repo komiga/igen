@@ -1,2 +1,4 @@
 
 libclang.so
+
+*.pyc
