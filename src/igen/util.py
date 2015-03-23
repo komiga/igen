@@ -51,6 +51,14 @@ def get_annotations(cursor):
 		if c.kind == CursorKind.ANNOTATE_ATTR
 	]
 
+def has_annotation(cursor, name):
+	for c in get_children(cursor):
+		if c.kind != CursorKind.ANNOTATE_ATTR:
+			continue
+		elif c.displayname == name:
+			return True
+	return False
+
 def fully_qualified_name_parts(cursor, until = None):
 	parts = [cursor.spelling]
 	p = cursor
