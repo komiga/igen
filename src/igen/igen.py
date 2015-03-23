@@ -83,6 +83,7 @@ class NamespaceGroup:
 		self.level = len(parts)
 		self.parts = parts
 		self.funcs = []
+		self.indent = self.level > 0 and "\t" or ""
 
 	def add_func(self, func):
 		self.funcs.append(func)

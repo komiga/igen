@@ -1,9 +1,9 @@
 %for ns in group.funcs_by_namespace.values():
 ${ns.open_string()}
 %for f in ns.funcs:
-${ns.level > 0 and "\t" or ""}${"brief: "}${f.cursor.brief_comment}
-${ns.level > 0 and "\t" or ""}${"raw: "}${f.cursor.raw_comment}
-${ns.level > 0 and "\t" or ""}${f.signature(named_args = False)};
+${ns.indent}${"brief: "}${f.cursor.brief_comment}
+${ns.indent}${"raw: "}${f.cursor.raw_comment}
+${ns.indent}${f.signature(named_args = False)};
 %endfor
 ${ns.close_string()}
 %endfor
