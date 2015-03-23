@@ -4,7 +4,7 @@ from .util import *
 
 global opts
 
-class Param(object):
+class Param:
 	def __init__(self, cursor):
 		self.cursor = cursor
 		self.name = cursor.spelling
@@ -16,7 +16,7 @@ class Param(object):
 		else:
 			self.signature = "%s %s" % (self.signature_unnamed, self.fully_qualified_name)
 
-class Function(object):
+class Function:
 	def __init__(self, cursor):
 		self.cursor = cursor
 		self.name = cursor.spelling
@@ -62,7 +62,7 @@ def collect_functions(cursor, path, funcs = None):
 				funcs.append(Function(c))
 	return funcs
 
-class Group(object):
+class Group:
 	def __init__(self, cursor, path):
 		self.path = path
 		self.funcs = collect_functions(cursor, path)
