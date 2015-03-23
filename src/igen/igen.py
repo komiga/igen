@@ -133,7 +133,7 @@ def collect(
 	pre_filter = None, post_filter = None,
 	userdata = None
 ):
-	index = cindex.Index.create()
+	index = clang_index()
 	tu = index.parse(path, args = clang_args, options = G.parse_options)
 	if not tu:
 		raise RuntimeError("failed to parse %s" % (path))

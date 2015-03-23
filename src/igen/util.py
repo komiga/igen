@@ -13,11 +13,17 @@ G = Globals(
 	debug = False,
 	children_cache = {},
 	parse_options = cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES,
+	clang_index = None,
 )
 
 def mtime(path):
 	stat = os.stat(path)
 	return stat.st_mtime
+
+def clang_index():
+	if not G.clang_index:
+		G.clang_index = cindex.Index.create()
+	return G.clang_index
 
 def visit(cursor, visitor, children):
 	cindex.conf.lib.clang_visitChildren(
