@@ -23,8 +23,8 @@ def main():
 
 	arg_sep_index = sys.argv.index("--")
 	opts = parser.parse_args(sys.argv[1:arg_sep_index])
+	clang_args = sys.argv[arg_sep_index + 1:]
 
-	clang_args = sys.argv[arg_sep_index + 2:]
 	if len(clang_args) == 0:
 		parser.error("missing clang-args")
 
