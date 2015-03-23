@@ -1,4 +1,6 @@
 
+from mako.template import Template
+
 from .include import *
 from .util import *
 
@@ -75,13 +77,42 @@ def collect_functions(cursor, pre_filter = None, post_filter = None, funcs = Non
 				funcs.append(f)
 	return funcs
 
-class Group:
-	def __init__(self, cursor, path, funcs):
-		self.path = path
-		self.funcs = funcs
+class NamespaceGroup:
+	def __init__(self, fqn, parts):
+		self.fqn = fqn
+		self.level = len(parts)
+		self.parts = parts
+		self.funcs = []
 
-	def write(self, path):
-		pass
+	def add_func(self, func):
+		self.funcs.append(func)
+
+	def open_string(self):
+		if self.level == 0:
+			return ""
+		return "".join(["namespace %s {" % (p) for p in self.parts])
+
+	def close_string(self):
+		if self.level == 0:
+			return ""
+		return "}" * len(self.parts)
+
+class Group:
+	def __init__(self, cursor, path, userdata = None):
+		self.path = path
+		self.funcs = []
+		self.funcs_by_namespace = {}
+		self.userdata = userdata
+
+	def add_funcs(self, funcs):
+		for f in funcs:
+			fqn = f.parent_fqn or "<root>"
+			ns = self.funcs_by_namespace.get(fqn)
+			if not ns:
+				ns = NamespaceGroup(fqn, f.parent_fqn_parts)
+				self.funcs_by_namespace[fqn] = ns
+			ns.add_func(f)
+			self.funcs.append(f)
 
 def make_pre_filter_path(path):
 	def f(cursor):
@@ -96,21 +127,35 @@ def make_pre_filter_annotation(match = "igen"):
 		return False
 	return f
 
-def collect(path, clang_args, pre_filter = None, post_filter = None):
+def collect(
+	path, clang_args,
+	pre_filter = None, post_filter = None,
+	userdata = None
+):
 	index = cindex.Index.create()
 	tu = index.parse(path, clang_args)
 	if not tu:
 		raise RuntimeError("failed to parse %s" % (path))
-	funcs = collect_functions(tu.cursor, pre_filter, post_filter)
-	g = Group(tu.cursor, path, funcs)
+	g = Group(tu.cursor, path, userdata)
+	g.add_funcs(collect_functions(tu.cursor, pre_filter, post_filter))
 	return g
 
-def generate(path, gen_path, clang_args, pre_filter = None, post_filter = None):
-	g = collect(path, clang_args, pre_filter, post_filter)
+def generate(
+	path, gen_path, clang_args, template,
+	pre_filter = None, post_filter = None,
+	userdata = None
+):
+	g = collect(path, clang_args, pre_filter, post_filter, userdata)
 	print("generate: %s -> %s" % (path, gen_path))
-	for f in g.funcs:
-		print("  %s in %s" % (f.signature_fqn(), f.contextual_parent or "<root>"))
-		print("    explicit in %s" % (f.explicitly_qualified_name))
-		# print("    in %s" % (f.cursor.location.file.name))
-		# print("    annotations = %r" % (get_annotations(f.cursor)))
+	if G.debug:
+		for f in g.funcs:
+			print("  %s in %s" % (f.signature_fqn(), f.contextual_parent or "<root>"))
+			# print("    file %s" % (f.cursor.location.file.name))
+			if f.explicitly_qualified_name:
+				print("    explicit %s" % (f.explicitly_qualified_name))
+			# print("    annotations = %r" % (get_annotations(f.cursor)))
+	fp = open(gen_path, "w")
+	data = template.render_unicode(group = g)
+	fp.write(data.encode('utf-8', 'replace'))
+	fp.close()
 	return g
