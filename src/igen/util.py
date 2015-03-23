@@ -1,4 +1,6 @@
 
+import os
+
 from .include import *
 
 class Globals:
@@ -11,6 +13,10 @@ G = Globals(
 	debug = False,
 	children_cache = {},
 )
+
+def mtime(path):
+	stat = os.stat(path)
+	return stat.st_mtime
 
 def visit(cursor, visitor, children):
 	cindex.conf.lib.clang_visitChildren(
