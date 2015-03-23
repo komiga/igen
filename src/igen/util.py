@@ -25,9 +25,9 @@ def clang_index():
 		G.clang_index = cindex.Index.create()
 	return G.clang_index
 
-def visit(cursor, visitor, children):
+def visit(cursor, visitor, userdata):
 	cindex.conf.lib.clang_visitChildren(
-		cursor, cindex.callbacks['cursor_visit'](visitor), children
+		cursor, cindex.callbacks['cursor_visit'](visitor), userdata
 	)
 
 # Unfortunately, cindex.Cursor.get_children() gives an iterator instead of
