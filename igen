@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INVOKE="python2.7 src/igen.py"
+INVOKE="python2.7 src/tool_main.py"
 
 if [[ $# == 0 ]]; then
 	$INVOKE
