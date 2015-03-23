@@ -134,7 +134,7 @@ def collect(
 	userdata = None
 ):
 	index = cindex.Index.create()
-	tu = index.parse(path, clang_args)
+	tu = index.parse(path, args = clang_args, options = G.parse_options)
 	if not tu:
 		raise RuntimeError("failed to parse %s" % (path))
 	g = Group(tu.cursor, path, userdata)

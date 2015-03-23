@@ -12,6 +12,7 @@ global G
 G = Globals(
 	debug = False,
 	children_cache = {},
+	parse_options = cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES,
 )
 
 def mtime(path):
