@@ -7,12 +7,12 @@ class Param:
 		self.cursor = cursor
 		self.name = cursor.spelling
 		self.type = cursor.type
-		self.fully_qualified_name = fully_qualified_name(self.cursor)
+		self.fqn = fully_qualified_name(self.cursor)
 		self.signature_unnamed = self.type.spelling
 		if not self.name:
 			self.signature = self.signature_unnamed
 		else:
-			self.signature = "%s %s" % (self.signature_unnamed, self.fully_qualified_name)
+			self.signature = "%s %s" % (self.signature_unnamed, self.fqn)
 
 class Function:
 	def __init__(self, cursor):
@@ -24,15 +24,23 @@ class Function:
 		p = self.cursor.lexical_parent
 		self.contextual_parent = (p and p.kind == CursorKind.NAMESPACE) and p.spelling or None
 
+		self.explicitly_qualified_name = \
+			self.contextual_parent and \
+			fully_qualified_name(self.cursor.semantic_parent, self.contextual_parent) or None
+
 		for c in get_children(self.cursor):
 			if not c.kind == CursorKind.PARM_DECL:
 				continue
 			self.params.append(Param(c))
 
-		sp = self.cursor.semantic_parent
-		self.explicitly_qualified_name = sp and fully_qualified_name(sp, self.contextual_parent) or None
-		self.fully_qualified_name_parts = fully_qualified_name_parts(self.cursor)
-		self.fully_qualified_name = fully_qualified_name(None, parts = self.fully_qualified_name_parts)
+		p = self.cursor.semantic_parent
+		p = p.kind == CursorKind.NAMESPACE and p or None
+		self.parent_fqn_parts = p and fully_qualified_name_parts(p) or []
+		self.parent_fqn = fully_qualified_name(None, parts = self.parent_fqn_parts)
+
+		self.fqn_parts = self.parent_fqn_parts + [self.name]
+		self.fqn = fully_qualified_name(None, parts = self.fqn_parts)
+
 		self.args_signature = ", ".join(p.signature for p in self.params)
 		self.args_signature_unnamed = ", ".join(p.signature_unnamed for p in self.params)
 
@@ -48,7 +56,7 @@ class Function:
 
 	def signature_fqn(self, named_args = True):
 		return self.signature(
-			name = self.fully_qualified_name,
+			name = self.fqn,
 			named_args = named_args,
 		)
 
