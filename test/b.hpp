@@ -12,5 +12,6 @@ void N::nf(X x) {
 void sf(N::S&);
 
 namespace N {
+	[[noreturn]]
 	S nsf();
 }
