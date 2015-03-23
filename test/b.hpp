@@ -3,6 +3,8 @@
 
 #include "./a.hpp"
 
+/// 1
+/// 2
 void b(float);
 
 void N::nf(X x) {
