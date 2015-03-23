@@ -1,8 +1,16 @@
 
 from .include import *
 
-global G_children_cache
-G_children_cache = {}
+class Globals:
+	def __init__(self, **kwargs):
+		for key, value in kwargs.iteritems():
+			self.__dict__[key] = value
+
+global G
+G = Globals(
+	debug = False,
+	children_cache = {},
+)
 
 def visit(cursor, visitor, children):
 	cindex.conf.lib.clang_visitChildren(
@@ -23,11 +31,11 @@ def Cursor_get_children(cursor):
 	return children
 
 def get_children(cursor):
-	children = G_children_cache.get(cursor.hash, None)
+	children = G.children_cache.get(cursor.hash, None)
 	# print("hit: %s / %s %d %s" % (children and "yes" or "no ", cursor.kind, cursor.hash, cursor.spelling))
 	if not children:
 		children = Cursor_get_children(cursor)
-		G_children_cache[cursor.hash] = children
+		G.children_cache[cursor.hash] = children
 	return children
 
 def get_annotations(cursor):
