@@ -29,8 +29,10 @@ class Function:
 				continue
 			self.params.append(Param(c))
 
+		sp = self.cursor.semantic_parent
+		self.explicitly_qualified_name = sp and fully_qualified_name(sp, self.contextual_parent) or None
 		self.fully_qualified_name_parts = fully_qualified_name_parts(self.cursor)
-		self.fully_qualified_name = fully_qualified_name(None, self.fully_qualified_name_parts)
+		self.fully_qualified_name = fully_qualified_name(None, parts = self.fully_qualified_name_parts)
 		self.args_signature = ", ".join(p.signature for p in self.params)
 		self.args_signature_unnamed = ", ".join(p.signature_unnamed for p in self.params)
 
