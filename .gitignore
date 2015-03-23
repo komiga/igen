@@ -2,3 +2,4 @@
 libclang.so
 
 *.pyc
+test/*.gen
