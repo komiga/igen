@@ -2,10 +2,5 @@
 
 INVOKE="python2.7 src/tool_main.py"
 
-if [[ $# == 0 ]]; then
-	$INVOKE
-	exit $?
-fi
-
-$INVOKE $@ -x c++ -std=c++11
+$INVOKE $1 $2 -- ${@:2} -x c++ -std=c++11
 exit $?
