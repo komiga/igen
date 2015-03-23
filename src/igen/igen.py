@@ -100,6 +100,7 @@ class NamespaceGroup:
 
 class Group:
 	def __init__(self, cursor, path, userdata = None):
+		self.cursor = cursor
 		self.path = path
 		self.funcs = []
 		self.funcs_by_namespace = {}
