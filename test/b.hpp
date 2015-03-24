@@ -10,6 +10,10 @@
 /// 2
 void b(float);
 
+void b2(
+	int i __attribute__((annotate("igen_default:42")))
+);
+
 void N::nf(X x) {
 	(void)x;
 }
