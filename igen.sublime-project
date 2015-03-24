@@ -1,0 +1,28 @@
+{
+	"folders":
+	[
+		{
+			"name": "Root",
+			"path": "./",
+			"folder_exclude_patterns": [
+				"src",
+				"test"
+			]
+		},
+		{
+			"name": "- Source",
+			"path": "./src/"
+		},
+		{
+			"name": "- Test",
+			"path": "./test/",
+			"file_exclude_patterns": [
+				"*.gen"
+			]
+		}
+	],
+	"settings":
+	{
+		"tab_size": 4
+	}
+}
