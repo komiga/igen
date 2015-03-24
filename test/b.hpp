@@ -14,6 +14,8 @@ void b2(
 	int i __attribute__((annotate("igen_default:42")))
 );
 
+void b3(char a[]);
+
 void N::nf(X x) {
 	(void)x;
 }
