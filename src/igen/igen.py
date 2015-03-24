@@ -23,21 +23,23 @@ class Function:
 		self.result_type = cursor.result_type
 		self.params = []
 
-		p = self.cursor.lexical_parent
-		self.contextual_parent = (p and p.kind == CursorKind.NAMESPACE) and p.spelling or None
-
-		self.explicitly_qualified_name = \
-			self.contextual_parent and \
-			fully_qualified_name(self.cursor.semantic_parent, self.contextual_parent) or None
+		lp = self.cursor.lexical_parent
+		sp = self.cursor.semantic_parent
+		self.ctx_parent = (lp and lp.kind == CursorKind.NAMESPACE) and lp or None
+		self.ctx_parent_name = self.ctx_parent and lp.spelling or None
+		self.xqn = fully_qualified_name(sp, lp)
+		#print(
+		#	"func %s: %s, %s == %r, xqn: %s" % (
+		#	self.name, sp.spelling, lp.spelling, sp == lp, self.xqn
+		#))
 
 		for c in get_children(self.cursor):
 			if not c.kind == CursorKind.PARM_DECL:
 				continue
 			self.params.append(Param(c))
 
-		p = self.cursor.semantic_parent
-		p = p.kind == CursorKind.NAMESPACE and p or None
-		self.parent_fqn_parts = p and fully_qualified_name_parts(p) or []
+		sp = sp.kind == CursorKind.NAMESPACE and sp or None
+		self.parent_fqn_parts = sp and fully_qualified_name_parts(sp) or []
 		self.parent_fqn = fully_qualified_name(None, parts = self.parent_fqn_parts)
 
 		self.fqn_parts = self.parent_fqn_parts + [self.name]
@@ -151,10 +153,10 @@ def generate(
 	print("generate: %s -> %s" % (path, gen_path))
 	if G.debug:
 		for f in g.funcs:
-			print("  %s in %s" % (f.signature_fqn(), f.contextual_parent or "<root>"))
+			print("  %s in %s" % (f.signature_fqn(), f.ctx_parent_name or "<root>"))
 			# print("    file %s" % (f.cursor.location.file.name))
-			if f.explicitly_qualified_name:
-				print("    explicit %s" % (f.explicitly_qualified_name))
+			if f.xqn:
+				print("    explicit %s" % (f.xqn))
 			# print("    annotations = %r" % (get_annotations(f.cursor)))
 	fp = open(gen_path, "w")
 	data = template.render_unicode(group = g)
