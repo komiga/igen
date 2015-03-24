@@ -67,16 +67,31 @@ def has_annotation(cursor, name):
 	return False
 
 def fully_qualified_name_parts(cursor, until = None):
-	parts = [cursor.spelling]
+	until_cursor = until and until[0] or None
+	until_parts = until and until[1] or None
+
 	p = cursor
-	while True:
-		p = p.semantic_parent
-		# print("%s: %s" % (p.kind, p.spelling))
-		# TODO: Other valid parts?
-		if not p or p.kind != CursorKind.NAMESPACE or (until and p.spelling == until):
-			break
+	parts = []
+	while p and (not until or p != until_cursor):
 		parts.append(p.spelling)
-	return parts[::-1]
+		p = p.semantic_parent
+		# TODO: Other valid parts?
+		if p and p.kind != CursorKind.NAMESPACE:
+			break
+
+	# Reverse
+	parts = parts[::-1]
+
+	# Trim parts if until_cursor wasn't part of the tree
+	if until_parts and p != until_cursor:
+		matching = 0
+		for i in range(min(len(parts), len(until_parts))):
+			if parts[i] != until_parts[i]:
+				break
+			matching += 1
+		parts = parts[matching:]
+
+	return parts
 
 def fully_qualified_name(cursor, until = None, parts = None):
 	if parts == None:
