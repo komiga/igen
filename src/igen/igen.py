@@ -36,7 +36,7 @@ class Function:
 		self.name = cursor.spelling
 		self.result_type = cursor.result_type
 
-		lp = self.cursor.lexical_parent
+		lp = self.cursor.lexical_parent.canonical
 		sp = self.cursor.semantic_parent
 		self.ctx_parent = (lp and lp.kind == CursorKind.NAMESPACE) and lp or None
 		self.ctx_parent_name = self.ctx_parent and lp.spelling or None
