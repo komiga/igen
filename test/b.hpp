@@ -1,3 +1,6 @@
+/**
+@ingroup B
+*/
 
 #pragma once
 
@@ -16,4 +19,12 @@ void sf(N::S&);
 namespace N {
 	[[noreturn]]
 	S nsf();
+}
+
+namespace B1 {
+namespace B2 {
+	void f();
+}
+
+void B2::f() {}
 }

@@ -1,3 +1,6 @@
+/**
+@ingroup A
+*/
 
 #pragma once
 
