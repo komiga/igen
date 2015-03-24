@@ -27,14 +27,15 @@ class Function:
 		sp = self.cursor.semantic_parent
 		self.ctx_parent = (lp and lp.kind == CursorKind.NAMESPACE) and lp or None
 		self.ctx_parent_name = self.ctx_parent and lp.spelling or None
-		self.xqn = fully_qualified_name(sp, lp)
+		self.ctx_parent_parts = fully_qualified_name_parts(self.ctx_parent)
+		self.xqn = fully_qualified_name(sp, until = (lp, self.ctx_parent_parts))
 		#print(
 		#	"func %s: %s, %s == %r, xqn: %s" % (
 		#	self.name, sp.spelling, lp.spelling, sp == lp, self.xqn
 		#))
 
 		for c in get_children(self.cursor):
-			if not c.kind == CursorKind.PARM_DECL:
+			if c.kind != CursorKind.PARM_DECL:
 				continue
 			self.params.append(Param(c))
 
@@ -91,13 +92,9 @@ class NamespaceGroup:
 		self.funcs.append(func)
 
 	def open_string(self):
-		if self.level == 0:
-			return ""
 		return "".join(["namespace %s {" % (p) for p in self.parts])
 
 	def close_string(self):
-		if self.level == 0:
-			return ""
 		return "}" * len(self.parts)
 
 class Group:
