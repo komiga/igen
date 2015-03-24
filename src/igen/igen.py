@@ -158,8 +158,7 @@ def generate(
 			if f.xqn:
 				print("    explicit %s" % (f.xqn))
 			# print("    annotations = %r" % (get_annotations(f.cursor)))
-	fp = open(gen_path, "w")
 	data = template.render_unicode(group = g)
-	fp.write(data.encode('utf-8', 'replace'))
-	fp.close()
+	with open(gen_path, "w") as f:
+		f.write(data.encode('utf-8', 'replace'))
 	return g
