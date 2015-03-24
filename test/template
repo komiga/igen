@@ -3,7 +3,7 @@ ${ns.open_string()}
 %for f in ns.funcs:
 ${ns.indent}${"brief: "}${f.cursor.brief_comment}
 ${ns.indent}${"raw: "}${f.cursor.raw_comment}
-${ns.indent}${f.signature(named_args = False)};
+${ns.indent}${f.signature(named_args = True)};
 %endfor
 ${ns.close_string()}
 %endfor
