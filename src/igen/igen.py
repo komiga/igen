@@ -35,7 +35,6 @@ class Function:
 		self.cursor = cursor
 		self.name = cursor.spelling
 		self.result_type = cursor.result_type
-		self.params = []
 
 		lp = self.cursor.lexical_parent
 		sp = self.cursor.semantic_parent
@@ -48,9 +47,9 @@ class Function:
 		#	self.name, sp.spelling, lp.spelling, sp == lp, self.xqn
 		#))
 
-		for c in get_children(self.cursor):
-			if c.kind != CursorKind.PARM_DECL:
-				continue
+		self.params = []
+		for c in self.cursor.get_arguments():
+			assert c.kind == CursorKind.PARM_DECL
 			self.params.append(Param(c))
 
 		sp = sp.kind == CursorKind.NAMESPACE and sp or None
