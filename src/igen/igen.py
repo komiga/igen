@@ -167,7 +167,10 @@ def generate(
 			# print("    file %s" % (f.cursor.location.file.name))
 			if f.xqn:
 				print("    explicit %s" % (f.xqn))
-			# print("    annotations = %r" % (get_annotations(f.cursor)))
+			annotations = get_annotations(f.cursor)
+			if annotations:
+				print("    annotations = %r" % (annotations))
+			# print("    displayname = %s" % (f.cursor.displayname))
 	data = template.render_unicode(group = g)
 	with open(gen_path, "w") as f:
 		f.write(data.encode('utf-8', 'replace'))
