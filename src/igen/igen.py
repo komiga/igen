@@ -9,7 +9,6 @@ class Param:
 		self.cursor = cursor
 		self.name = cursor.spelling
 		self.type = cursor.type
-		self.fqn = fully_qualified_name(self.cursor)
 		self.default_value = None
 
 		for c in get_children(self.cursor):
@@ -20,10 +19,18 @@ class Param:
 				break
 
 		self.signature_unnamed = self.type.spelling
+		array_type = self.type.get_array_element_type()
 		if not self.name:
 			self.signature = self.signature_unnamed
+		elif array_type and array_type.spelling:
+			i = self.signature_unnamed.rindex('[') or self.signature_unnamed
+			self.signature = "%s %s%s" % (
+				self.signature_unnamed[:i].strip(),
+				self.name,
+				self.signature_unnamed[i:] or ""
+			)
 		else:
-			self.signature = "%s %s" % (self.signature_unnamed, self.fqn)
+			self.signature = "%s %s" % (self.signature_unnamed, self.name)
 
 		if self.default_value:
 			dv = " = " + self.default_value
