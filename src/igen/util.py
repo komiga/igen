@@ -81,4 +81,4 @@ def fully_qualified_name_parts(cursor, until = None):
 def fully_qualified_name(cursor, until = None, parts = None):
 	if parts == None:
 		parts = fully_qualified_name_parts(cursor, until)
-	return "::".join(parts) #or None
+	return "::".join(parts) or None
