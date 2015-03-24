@@ -10,11 +10,25 @@ class Param:
 		self.name = cursor.spelling
 		self.type = cursor.type
 		self.fqn = fully_qualified_name(self.cursor)
+		self.default_value = None
+
+		for c in get_children(self.cursor):
+			if c.kind != CursorKind.ANNOTATE_ATTR:
+				continue
+			elif c.spelling.startswith("igen_default:"):
+				self.default_value = c.spelling.replace("igen_default:", "")
+				break
+
 		self.signature_unnamed = self.type.spelling
 		if not self.name:
 			self.signature = self.signature_unnamed
 		else:
 			self.signature = "%s %s" % (self.signature_unnamed, self.fqn)
+
+		if self.default_value:
+			dv = " = " + self.default_value
+			self.signature_unnamed += dv
+			self.signature += dv
 
 class Function:
 	def __init__(self, cursor):
