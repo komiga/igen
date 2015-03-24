@@ -16,10 +16,6 @@ G = Globals(
 	clang_index = None,
 )
 
-def mtime(path):
-	stat = os.stat(path)
-	return stat.st_mtime
-
 def clang_index():
 	if not G.clang_index:
 		G.clang_index = cindex.Index.create()
