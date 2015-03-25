@@ -2,5 +2,16 @@
 
 INVOKE="python2.7 src/tool_main.py"
 
-$INVOKE $1 $2 $3 -- ${@:4} -x c++ -std=c++11 -fsyntax-only
+argv=("$@")
+clang_argv=()
+
+for (( i = 0; i < ${#argv[@]}; i++ )); do
+	if [ "${argv[$i]}" = "--" ]; then
+		clang_argv=("${argv[@]:$i+1}")
+		argv=("${argv[@]:0:$i}")
+		break
+	fi
+done
+
+$INVOKE ${argv[@]} -- ${clang_argv[@]} -x c++ -std=c++11 -fsyntax-only
 exit $?
