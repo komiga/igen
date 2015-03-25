@@ -85,21 +85,6 @@ class Function:
 			named_args = named_args,
 		)
 
-def collect_functions(cursor, pre_filter = None, post_filter = None, funcs = None):
-	funcs = funcs or []
-	for c in get_children(cursor):
-		if c.kind == CursorKind.NAMESPACE:
-			# FIXME: Why does funcs have to be reassigned?
-			# It should be the same object.
-			funcs = collect_functions(c, pre_filter, post_filter, funcs)
-		elif c.kind != CursorKind.FUNCTION_DECL:
-			continue
-		elif not pre_filter or pre_filter(c):
-			f = Function(c)
-			if not post_filter or post_filter(f):
-				funcs.append(f)
-	return funcs
-
 class NamespaceGroup:
 	def __init__(self, fqn, parts):
 		self.fqn = fqn
@@ -118,9 +103,7 @@ class NamespaceGroup:
 		return "}" * len(self.parts)
 
 class Group:
-	def __init__(self, cursor, path, userdata = None):
-		self.cursor = cursor
-		self.path = path
+	def __init__(self, userdata):
 		self.funcs = []
 		self.funcs_by_namespace = {}
 		self.userdata = userdata
@@ -135,9 +118,9 @@ class Group:
 			ns.add_func(f)
 			self.funcs.append(f)
 
-def make_pre_filter_path(path):
+def make_pre_filter_paths(paths):
 	def f(cursor):
-		return cursor.location.file.name == path
+		return cursor.location.file.name in paths
 	return f
 
 def make_pre_filter_annotation(match = "igen"):
@@ -149,25 +132,43 @@ def make_pre_filter_annotation(match = "igen"):
 	return f
 
 def collect(
-	path, clang_args,
+	cursor,
 	pre_filter = None, post_filter = None,
-	userdata = None
+	funcs = None
 ):
-	index = clang_index()
-	tu = index.parse(path, args = clang_args, options = G.parse_options)
+	funcs = funcs or []
+	for c in get_children(cursor):
+		if c.kind == CursorKind.NAMESPACE:
+			# FIXME: Why does funcs have to be reassigned?
+			# It should be the same object.
+			funcs = collect(c, pre_filter, post_filter, funcs)
+		elif c.kind != CursorKind.FUNCTION_DECL:
+			continue
+		elif not pre_filter or pre_filter(c):
+			f = Function(c)
+			if not post_filter or post_filter(f):
+				funcs.append(f)
+	return funcs
+
+def parse_and_collect(
+	path, clang_args,
+	pre_filter = None, post_filter = None
+):
+	tu = clang_index().parse(path, args = clang_args, options = G.parse_options)
 	if not tu:
 		raise RuntimeError("failed to parse %s" % (path))
-	g = Group(tu.cursor, path, userdata)
-	g.add_funcs(collect_functions(tu.cursor, pre_filter, post_filter))
-	return g
+	return collect(tu.cursor, pre_filter, post_filter)
 
 def generate(
-	path, gen_path, clang_args, template,
+	paths, gen_path, clang_args, template,
 	pre_filter = None, post_filter = None,
 	userdata = None
 ):
-	g = collect(path, clang_args, pre_filter, post_filter, userdata)
-	print("generate: %s -> %s" % (path, gen_path))
+	g = Group(userdata)
+	for p in paths:
+		g.add_funcs(parse_and_collect(p, clang_args, pre_filter, post_filter))
+
+	print("generate: %s" % (gen_path))
 	if G.debug:
 		for f in g.funcs:
 			print("  %s in %s" % (f.signature_fqn(), f.ctx_parent_name or "<root>"))

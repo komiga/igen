@@ -11,12 +11,12 @@ from igen.util import *
 def main():
 	parser = argparse.ArgumentParser(
 		prog = "igen",
-		usage = "igen [options] path gen_path template_path -- clang-args",
+		usage = "igen [options] template_path gen_path path [path ...] -- clang-args",
 	)
 
-	parser.add_argument("path", type = str, help = "path to parse")
-	parser.add_argument("gen_path", type = str, help = "path to generate")
 	parser.add_argument("template_path", type = str, help = "path to template")
+	parser.add_argument("gen_path", type = str, help = "path to generate")
+	parser.add_argument("paths", type = str, nargs = "+", help = "paths to parse")
 
 	if "--" not in sys.argv:
 		parser.error("missing clang-args")
@@ -33,10 +33,10 @@ def main():
 
 	template = Template(filename = opts.template_path)
 	igen.generate(
-		opts.path, opts.gen_path, clang_args,
+		opts.paths, opts.gen_path, clang_args,
 		template = template,
 		userdata = None,
-		pre_filter = igen.make_pre_filter_path(opts.path),
+		pre_filter = igen.make_pre_filter_paths(opts.paths),
 		post_filter = None
 	)
 
