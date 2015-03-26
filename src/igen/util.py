@@ -58,6 +58,8 @@ def has_annotation(cursor, name):
 	for c in get_children(cursor):
 		if c.kind != CursorKind.ANNOTATE_ATTR:
 			continue
+		elif type(name) == list and c.displayname in name:
+			return True
 		elif c.displayname == name:
 			return True
 	return False
