@@ -273,8 +273,8 @@ def build(argv):
 	assert G.tool_interface_configured, "tooling not configured"
 
 	arg_sep_index = argv.index("--")
-	argv = argv[1:arg_sep_index]
 	argv_rest = argv[arg_sep_index + 1:]
+	argv = argv[1:arg_sep_index]
 
 	def opt(name):
 		return (
