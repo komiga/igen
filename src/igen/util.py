@@ -3,13 +3,16 @@ import os
 
 from .include import *
 
-class Globals:
+class AttrDict(dict):
+	__getattr__ = dict.__getitem__
+	__setattr__ = dict.__setitem__
+
 	def __init__(self, **kwargs):
 		for key, value in kwargs.iteritems():
-			self.__dict__[key] = value
+			setattr(self, key, value)
 
 global G
-G = Globals(
+G = AttrDict(
 	debug = False,
 	children_cache = {},
 	parse_options = cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES,
