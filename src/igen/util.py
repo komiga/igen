@@ -98,3 +98,15 @@ def fully_qualified_name(cursor, until = None, parts = None):
 	if parts == None:
 		parts = fully_qualified_name_parts(cursor, until)
 	return "::".join(parts) or None
+
+def mtime(path):
+	if os.path.exists(path):
+		stat = os.stat(path)
+		return stat.st_mtime
+	return 0
+
+def splitext(path):
+	p, e = os.path.splitext(path)
+	if e:
+		e = e[1:]
+	return p, e
