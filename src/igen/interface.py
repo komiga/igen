@@ -186,17 +186,20 @@ class Collector:
 		(re.compile(r'//\s*igen-source-pattern:\s*([^\s]+)$'), m_6),
 	]
 
+	def add_group(self, name, path, src_inner_prefix):
+		path += "/src"
+		self.groups.append(AttrDict(
+			name = name,
+			src = path,
+			src_inner = path + '/' + G.SOURCE_BASEPATH + '/' + src_inner_prefix + name,
+			user_paths = [],
+		))
+
 	def add_groups(self, path, src_inner_prefix):
 		for name in os.listdir(path):
 			if not os.path.isdir(os.path.join(path, name)):
 				continue
-			src = path + '/' + name + '/' + "src"
-			self.groups.append(AttrDict(
-				name = name,
-				src = src,
-				src_inner = src + '/' + G.SOURCE_BASEPATH + '/' + src_inner_prefix + name,
-				user_paths = [],
-			))
+			self.add_group(name, path + '/' + name, src_inner_prefix)
 
 	def process_file(self, group, path):
 		path_no_ext, _ = splitext(path)
